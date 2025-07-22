@@ -62,6 +62,10 @@ namespace cli {
     private:
         string _what;
     };
+    /// A parse error that can be identified as a user trying to obtain the help.
+    struct help_error: parse_error {
+      using parse_error::parse_error;
+    };
 
     struct group;
     template<typename T>
@@ -1024,6 +1028,13 @@ namespace cli {
             }
         }
         if (!ms.remaining_args.empty()) {
+            // Check if any argument can be identified as the user searching for the help.
+            for (const auto &remaining : ms.remaining_args) {
+                if (remaining == "-h" || remaining == "--help") {
+                    throw help_error("unexpected argument: "+remaining);
+                }
+            }
+
             if (ms.remaining_args[0].find('-')==0) {
                 throw parse_error("unexpected option: "+ms.remaining_args[0]);
             } else {

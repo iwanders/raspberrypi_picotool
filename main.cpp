@@ -1769,8 +1769,16 @@ int parse(const int argc, char **argv) {
             no_global_header = true;
             throw cli::parse_error("unknown command '" + args[0] + "'");
         }
-        cli::match(settings, selected_cmd->get_cli(), args);
-    } catch (std::exception &e) {
+
+        // If a parse error occurs, and it is a cry for help, print the help instead.
+        try {
+          cli::match(settings, selected_cmd->get_cli(), args);
+        } catch (const cli::help_error &e) { 
+            help_mode = true;
+            usage();
+            return 1;
+        }
+    } catch (const std::exception &e) {
         fos.wrap_hard();
         fos << "ERROR: " << e.what() << "\n\n";
         usage();

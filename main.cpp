@@ -1719,6 +1719,14 @@ int parse(const int argc, char **argv) {
     };
 
     auto args = cli::make_args(argc, argv);
+
+    // Check if any -h or --help argument was requested, if so insert the help subcommand before any
+    // arguments, this will ensure the correct help gets printed automatically.
+    bool help_requested = std::find(args.begin(), args.end(), "--help") != args.end()
+                          || std::find(args.begin(), args.end(), "-h") != args.end();
+    if (help_requested) {
+      args.insert(args.begin(), "help");
+    }
     if (args.empty()) {
         usage();
         return 0;
